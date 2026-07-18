@@ -437,21 +437,63 @@ const RACES = ['Sprint','Olympique'];
 let cache = { config:{adminCode:null, raceStart:{}}, roster:[], times:{} };
 let ui = { race:'Sprint', raceAdmin:'Sprint', cp:'swim_exit', adminUnlocked:false, refreshTimer:null };
 
-/* ================= STORAGE HELPERS ================= */
+// 1. Configuration de votre projet (à récupérer dans les paramètres de votre projet sur la console Firebase)
+const firebaseConfig = {
+  apiKey: "VOTRE_CLE_API",
+  authDomain: "triathlon-amical.firebaseapp.com",
+  projectId: "triathlon-amical",
+  storageBucket: "triathlon-amical.firebasestorage.app",
+  messagingSenderId: "539747349116",
+  appId: "VOTRE_APP_ID"
+};
+
+// 2. Initialisation de Firebase et de Firestore
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* ================= STORAGE HELPERS (Firestore compat) ================= */
 async function safeGet(key, shared){
-  try{ const r = await window.storage.get(key, shared); return r ? r.value : null; }
-  catch(e){ return null; }
+  try {
+    const doc = await db.collection('triathlon_data').doc(key).get();
+    return doc.exists ? { value: doc.data().value } : null;
+  } catch(e) {
+    console.error('Firestore get failed', key, e);
+    return null;
+  }
 }
+
 async function safeSet(key, value, shared){
-  try{ const r = await window.storage.set(key, value, shared); return !!r; }
-  catch(e){ console.error('storage set failed', key, e); return false; }
+  try {
+    await db.collection('triathlon_data').doc(key).set({ value: value });
+    return true;
+  } catch(e) {
+    console.error('Firestore set failed', key, e);
+    return false;
+  }
 }
+
 async function safeDelete(key, shared){
-  try{ await window.storage.delete(key, shared); }catch(e){}
+  try {
+    await db.collection('triathlon_data').doc(key).delete();
+  } catch(e) {
+    console.error('Firestore delete failed', key, e);
+  }
 }
+
 async function safeList(prefix, shared){
-  try{ const r = await window.storage.list(prefix, shared); return r ? r.keys : []; }
-  catch(e){ return []; }
+  try {
+    const snapshot = await db.collection('triathlon_data').get();
+    const keys = [];
+    snapshot.forEach(doc => {
+      if(doc.id.startsWith(prefix)) {
+        keys.push(doc.id);
+      }
+    });
+    return keys;
+  } catch(e) {
+    console.error('Firestore list failed', e);
+    return [];
+  }
 }
 
 /* ================= DATA LOAD ================= */

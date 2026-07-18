@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Chrono Triathlon Amical</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B1D33;
+    --ink-2:#122844;
+    --ink-3:#1C3A5E;
+    --paper:#EFF3F1;
+    --paper-2:#E2E9E5;
+    --text-on-ink:#F3F1EA;
+    --text-on-paper:#0B1D33;
+    --muted:#5C7086;
+    --swim:#1FA6A0;
+    --bike:#FF5A1F;
+    --run:#FFB100;
+    --danger:#E14B4B;
+    --ok:#2FB673;
+    --radius:14px;
+    --font-display:'Big Shoulders Display', 'Arial Black', sans-serif;
+    --font-mono:'Space Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --font-body:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--text-on-paper);
+    font-family:var(--font-body);
+    min-height:100vh;
+  }
+  ::selection{background:var(--bike);color:#fff;}
+
+  /* ---------- Top bar ---------- */
+  .topbar{
+    background:var(--ink);
+    color:var(--text-on-ink);
+    padding:18px 20px 0 20px;
+    position:sticky;top:0;z-index:50;
+    box-shadow:0 2px 12px rgba(11,29,51,.25);
+  }
+  .topbar-inner{max-width:980px;margin:0 auto;}
+  .brand{
+    display:flex;align-items:baseline;gap:10px;margin-bottom:14px;
+  }
+  .brand-mark{
+    font-family:var(--font-display);
+    font-weight:800;
+    font-size:26px;
+    letter-spacing:.5px;
+    display:flex;gap:2px;
+  }
+  .brand-mark span:nth-child(1){color:var(--swim);}
+  .brand-mark span:nth-child(2){color:var(--bike);}
+  .brand-mark span:nth-child(3){color:var(--run);}
+  .brand-sub{font-size:12px;color:#9FB4CC;letter-spacing:.06em;text-transform:uppercase;}
+  .tabs{display:flex;gap:4px;}
+  .tab-btn{
+    background:transparent;border:none;color:#9FB4CC;
+    font-family:var(--font-body);font-weight:600;font-size:14px;
+    padding:10px 16px;cursor:pointer;border-radius:10px 10px 0 0;
+    transition:background .15s, color .15s;
+  }
+  .tab-btn:hover{color:#fff;}
+  .tab-btn.active{background:var(--paper);color:var(--ink);}
+
+  .view{max-width:980px;margin:0 auto;padding:20px 16px 60px;}
+  .view[hidden]{display:none;}
+
+  h1,h2,h3{font-family:var(--font-display);font-weight:800;letter-spacing:.3px;margin:0 0 4px;}
+  h2{font-size:26px;}
+  h3{font-size:18px;}
+  p.lead{color:var(--muted);margin:0 0 18px;font-size:14px;}
+
+  .card{
+    background:#fff;border-radius:var(--radius);
+    padding:18px;margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(11,29,51,.08);
+    border:1px solid var(--paper-2);
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .row.between{justify-content:space-between;}
+
+  button{
+    font-family:var(--font-body);font-weight:600;cursor:pointer;
+    border:none;border-radius:10px;padding:10px 16px;font-size:14px;
+    transition:transform .08s, filter .15s;
+  }
+  button:active{transform:scale(.97);}
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{filter:brightness(1.2);}
+  .btn-accent{background:var(--bike);color:#fff;}
+  .btn-accent:hover{filter:brightness(1.08);}
+  .btn-ghost{background:var(--paper-2);color:var(--text-on-paper);}
+  .btn-ghost:hover{background:#d7e0dc;}
+  .btn-danger{background:var(--danger);color:#fff;}
+  .btn-sm{padding:7px 12px;font-size:12.5px;border-radius:8px;}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+
+  input,select{
+    font-family:var(--font-body);font-size:14px;
+    padding:9px 12px;border-radius:9px;border:1.5px solid var(--paper-2);
+    background:#fff;color:var(--text-on-paper);
+  }
+  input:focus,select:focus{outline:2px solid var(--bike);outline-offset:1px;}
+  input[type=text].mono, input.time-input{font-family:var(--font-mono);}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:20px;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .badge-sprint{background:#DDEDEC;color:var(--swim);}
+  .badge-olympique{background:#FFE7DA;color:var(--bike);}
+  .badge-dnf{background:#FBE0E0;color:var(--danger);}
+  .badge-ok{background:#DBF3E7;color:var(--ok);}
+  .badge-wait{background:var(--paper-2);color:var(--muted);}
+
+  .segbar{display:flex;height:8px;border-radius:6px;overflow:hidden;background:var(--paper-2);}
+  .segbar > div{height:100%;}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--paper-2);
+  }
+  td{padding:10px;border-bottom:1px solid var(--paper-2);vertical-align:middle;}
+  tr.clickable{cursor:pointer;}
+  tr.clickable:hover{background:var(--paper);}
+  .mono{font-family:var(--font-mono);}
+  .rank-num{font-family:var(--font-display);font-weight:800;font-size:18px;}
+  .rank-num.top1{color:var(--bike);}
+  .rank-num.top2{color:var(--ink-3);}
+  .rank-num.top3{color:var(--run);}
+
+  .empty{
+    text-align:center;padding:40px 20px;color:var(--muted);
+  }
+  .empty .big{font-size:34px;margin-bottom:8px;}
+
+  /* Chrono entry list */
+  .checkpoint-picker{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;}
+  .cp-btn{
+    flex:0 0 auto;background:var(--ink-2);color:#cfe0ee;border-radius:12px;
+    padding:12px 16px;text-align:center;min-width:120px;
+  }
+  .cp-btn .icon{font-size:20px;display:block;margin-bottom:2px;}
+  .cp-btn.active{background:var(--bike);color:#fff;}
+
+  .entry-row{
+    display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;
+    border:1.5px solid var(--paper-2);margin-bottom:8px;
+  }
+  .entry-row.done{background:#F6FAF8;border-color:#CFEBDD;}
+  .entry-bib{
+    font-family:var(--font-display);font-weight:800;font-size:20px;
+    background:var(--ink);color:#fff;border-radius:8px;
+    min-width:44px;text-align:center;padding:4px 0;
+  }
+  .entry-name{flex:1;min-width:120px;font-weight:600;}
+  .entry-time{font-family:var(--font-mono);font-size:15px;color:var(--muted);}
+
+  .podium{display:flex;align-items:flex-end;gap:10px;justify-content:center;margin:14px 0 22px;}
+  .pod{
+    flex:1;max-width:150px;border-radius:12px 12px 0 0;
+    text-align:center;color:#fff;padding:14px 8px 10px;
+  }
+  .pod .place{font-family:var(--font-display);font-weight:800;font-size:28px;}
+  .pod .name{font-weight:700;font-size:13px;margin:4px 0 2px;word-break:break-word;}
+  .pod .time{font-family:var(--font-mono);font-size:12.5px;opacity:.9;}
+  .pod-1{background:var(--bike);height:150px;order:2;}
+  .pod-2{background:var(--ink-3);height:120px;order:1;}
+  .pod-3{background:var(--run);height:100px;order:3;color:var(--ink);}
+
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(11,29,51,.55);
+    display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;
+  }
+  .modal-backdrop[hidden]{display:none;}
+  .modal{
+    background:#fff;border-radius:16px;max-width:440px;width:100%;
+    padding:22px;max-height:88vh;overflow-y:auto;
+  }
+  .split-line{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--paper-2);}
+  .split-dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;}
+  .split-label{flex:1;font-weight:600;font-size:13.5px;}
+  .split-time{font-family:var(--font-mono);font-weight:700;}
+
+  .footer-note{font-size:12px;color:var(--muted);text-align:center;margin-top:26px;}
+  .sync-status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .dot-live{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:640px){
+    .grid2{grid-template-columns:1fr;}
+    .brand-mark{font-size:21px;}
+    h2{font-size:21px;}
+    .tab-btn{padding:9px 11px;font-size:13px;}
+    .pod .name{font-size:11.5px;}
+  }
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;
+    font-size:13.5px;font-weight:600;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.25);
+    opacity:0;transition:opacity .25s;pointer-events:none;
+  }
+  .toast.show{opacity:1;}
+  label.field-label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;}
+  .field{margin-bottom:12px;}
+  .subtabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+  .subtab-btn{background:var(--paper-2);color:var(--muted);border-radius:9px;padding:8px 14px;font-size:13px;}
+  .subtab-btn.active{background:var(--ink);color:#fff;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark"><span>🏊</span><span>🚴</span><span>🏃</span></div>
+      <div>
+        <div style="font-family:var(--font-display);font-weight:800;font-size:19px;line-height:1;">CHRONO TRIATHLON</div>
+        <div class="brand-sub">édition amicale</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-view="results">Résultats</button>
+      <button class="tab-btn" data-view="admin">Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== RESULTS VIEW ===================== -->
+<div class="view" id="view-results">
+  <h2>Classement</h2>
+  <p class="lead">Suivi en direct — les temps sont saisis manuellement par l'équipe au fil de la course.</p>
+
+  <div class="card">
+    <div class="row between" style="margin-bottom:12px;">
+      <div class="subtabs" id="race-tabs"></div>
+      <div class="sync-status"><span class="dot-live"></span><span id="sync-label">à jour</span></div>
+    </div>
+    <div class="row" style="margin-bottom:8px;">
+      <input type="text" id="search-public" placeholder="Rechercher un participant..." style="flex:1;min-width:160px;">
+      <select id="filter-gender">
+        <option value="all">Tous</option>
+        <option value="F">Femmes</option>
+        <option value="H">Hommes</option>
+      </select>
+      <button class="btn-ghost btn-sm" id="btn-refresh-public">↻ Actualiser</button>
+    </div>
+  </div>
+
+  <div id="podium-zone"></div>
+
+  <div class="card" style="padding:0;overflow-x:auto;">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Dossard</th><th>Nom</th><th>Temps</th><th>Écart</th><th>Statut</th></tr>
+      </thead>
+      <tbody id="results-tbody"></tbody>
+    </table>
+    <div class="empty" id="results-empty" hidden><div class="big">🏁</div>Aucun résultat pour l'instant.</div>
+  </div>
+
+  <div class="card" id="best-splits-card">
+    <h3>Meilleurs temps par segment</h3>
+    <div id="best-splits-body"></div>
+  </div>
+
+  <p class="footer-note">Cliquez sur un participant pour voir le détail de ses temps intermédiaires.</p>
+</div>
+
+<!-- ===================== ADMIN VIEW ===================== -->
+<div class="view" id="view-admin" hidden>
+
+  <div id="admin-lock">
+    <div class="card" style="max-width:360px;margin:40px auto;">
+      <h3 id="lock-title">Accès admin</h3>
+      <p class="lead" id="lock-desc">Entrez le code admin.</p>
+      <div class="field">
+        <input type="password" id="admin-pin" placeholder="Code" style="width:100%;">
+      </div>
+      <button class="btn-accent" id="btn-unlock" style="width:100%;">Valider</button>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px;" id="lock-hint"></p>
+    </div>
+  </div>
+
+  <div id="admin-panel" hidden>
+    <div class="row between" style="margin-bottom:14px;">
+      <h2 style="margin:0;">Espace admin</h2>
+      <button class="btn-ghost btn-sm" id="btn-lock-again">🔒 Verrouiller</button>
+    </div>
+    <div class="subtabs">
+      <button class="subtab-btn active" data-admintab="chrono">⏱ Pointage</button>
+      <button class="subtab-btn" data-admintab="participants">👥 Participants</button>
+      <button class="subtab-btn" data-admintab="settings">⚙️ Réglages</button>
+    </div>
+
+    <!-- CHRONO -->
+    <div id="admintab-chrono">
+      <div class="card">
+        <label class="field-label">Point de passage</label>
+        <div class="checkpoint-picker" id="cp-picker"></div>
+      </div>
+      <div class="card">
+        <div class="row" style="margin-bottom:10px;">
+          <div class="subtabs" id="race-tabs-admin"></div>
+          <input type="text" id="search-admin" placeholder="Chercher dossard ou nom..." style="flex:1;min-width:140px;">
+        </div>
+        <div id="entry-list"></div>
+      </div>
+    </div>
+
+    <!-- PARTICIPANTS -->
+    <div id="admintab-participants" hidden>
+      <div class="card">
+        <h3>Ajouter un participant</h3>
+        <div class="grid2">
+          <div class="field"><label class="field-label">Dossard</label><input type="text" id="np-bib" style="width:100%;"></div>
+          <div class="field"></div>
+          <div class="field"><label class="field-label">Nom</label><input type="text" id="np-lastname" style="width:100%;"></div>
+          <div class="field"><label class="field-label">Pr\u00e9nom</label><input type="text" id="np-firstname" style="width:100%;"></div>
+          <div class="field"><label class="field-label">Course</label>
+            <select id="np-race" style="width:100%;"><option value="Sprint">Sprint</option><option value="Olympique">Olympique</option></select>
+          </div>
+          <div class="field"><label class="field-label">Genre</label>
+            <select id="np-gender" style="width:100%;"><option value="H">Homme</option><option value="F">Femme</option></select>
+          </div>
+        </div>
+        <button class="btn-accent" id="btn-add-participant">+ Ajouter</button>
+      </div>
+
+      <div class="card">
+        <h3>Import en masse (CSV)</h3>
+        <p class="lead">Colonnes attendues (ordre libre, en-t\u00eates insensibles \u00e0 la casse) : <strong>dossard, nom, prenom, course, genre</strong>. S\u00e9parateur virgule ou point-virgule.</p>
+        <div class="row" style="margin-bottom:10px;">
+          <input type="file" id="csv-file" accept=".csv,text/csv">
+          <button class="btn-primary btn-sm" id="btn-import-csv">Importer</button>
+          <button class="btn-ghost btn-sm" id="btn-template-csv">⬇ Mod\u00e8le CSV</button>
+        </div>
+        <div id="import-summary" style="font-size:13px;color:var(--muted);"></div>
+      </div>
+
+      <div class="card">
+        <div class="row between" style="margin-bottom:10px;">
+          <h3 style="margin:0;">Liste des participants (<span id="participant-count">0</span>)</h3>
+          <button class="btn-ghost btn-sm" id="btn-export-csv">⬇ Exporter CSV</button>
+        </div>
+        <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>Dossard</th><th>Nom</th><th>Pr\u00e9nom</th><th>Course</th><th>Genre</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="participants-tbody"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SETTINGS -->
+    <div id="admintab-settings" hidden>
+      <div class="card">
+        <h3>Heures de départ</h3>
+        <p class="lead">Départ groupé — sert de base au calcul du temps total et du temps de natation.</p>
+        <div class="grid2">
+          <div class="field"><label class="field-label">Départ Sprint</label><input type="text" class="time-input" id="start-sprint" placeholder="HH:MM:SS" style="width:100%;"></div>
+          <div class="field"><label class="field-label">Départ Olympique</label><input type="text" class="time-input" id="start-olympique" placeholder="HH:MM:SS" style="width:100%;"></div>
+        </div>
+        <button class="btn-primary" id="btn-save-starts">Enregistrer</button>
+      </div>
+      <div class="card">
+        <h3>Code admin</h3>
+        <div class="field"><input type="text" id="new-pin" placeholder="Nouveau code" style="width:100%;max-width:220px;"></div>
+        <button class="btn-ghost" id="btn-change-pin">Changer le code</button>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--danger);">Zone sensible</h3>
+        <p class="lead">Supprime tous les participants et tous les temps enregistrés. Irréversible.</p>
+        <button class="btn-danger" id="btn-reset-all">Réinitialiser toutes les données</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SPLIT MODAL ===================== -->
+<div class="modal-backdrop" id="split-modal" hidden>
+  <div class="modal">
+    <div class="row between" style="margin-bottom:6px;">
+      <h3 id="modal-name" style="margin:0;"></h3>
+      <button class="btn-ghost btn-sm" id="modal-close">✕</button>
+    </div>
+    <div id="modal-badges" style="margin-bottom:12px;"></div>
+    <div id="modal-splits"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="confirm-modal" hidden>
+  <div class="modal" style="max-width:340px;">
+    <p id="confirm-message" style="margin:0 0 16px;font-size:14.5px;"></p>
+    <div class="row" style="justify-content:flex-end;gap:8px;">
+      <button class="btn-ghost btn-sm" id="confirm-cancel">Annuler</button>
+      <button class="btn-danger btn-sm" id="confirm-ok">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="prompt-modal" hidden>
+  <div class="modal" style="max-width:340px;">
+    <p id="prompt-message" style="margin:0 0 10px;font-size:14.5px;"></p>
+    <input type="text" id="prompt-input" class="time-input" style="width:100%;margin-bottom:14px;">
+    <div class="row" style="justify-content:flex-end;gap:8px;">
+      <button class="btn-ghost btn-sm" id="prompt-cancel">Annuler</button>
+      <button class="btn-primary btn-sm" id="prompt-ok">Valider</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= CONFIG ================= */
+const CHECKPOINTS = [
+  {key:'swim_exit',  label:'Sortie de l\u2019eau',        icon:'🏊', color:'var(--swim)'},
+  {key:'bike_start', label:'D\u00e9part v\u00e9lo',          icon:'🚴', color:'var(--bike)'},
+  {key:'bike_end',   label:'Fin v\u00e9lo',                icon:'🔁', color:'var(--bike)'},
+  {key:'run_start',  label:'D\u00e9but course \u00e0 pied',   icon:'🏃', color:'var(--run)'},
+  {key:'finish',     label:'Fin course \u00e0 pied / Arriv\u00e9e', icon:'🏆', color:'var(--run)'},
+];
+const RACES = ['Sprint','Olympique'];
+
+let cache = { config:{adminCode:null, raceStart:{}}, roster:[], times:{} };
+let ui = { race:'Sprint', raceAdmin:'Sprint', cp:'swim_exit', adminUnlocked:false, refreshTimer:null };
+
+/* ================= STORAGE HELPERS ================= */
+async function safeGet(key, shared){
+  try{ const r = await window.storage.get(key, shared); return r ? r.value : null; }
+  catch(e){ return null; }
+}
+async function safeSet(key, value, shared){
+  try{ const r = await window.storage.set(key, value, shared); return !!r; }
+  catch(e){ console.error('storage set failed', key, e); return false; }
+}
+async function safeDelete(key, shared){
+  try{ await window.storage.delete(key, shared); }catch(e){}
+}
+async function safeList(prefix, shared){
+  try{ const r = await window.storage.list(prefix, shared); return r ? r.keys : []; }
+  catch(e){ return []; }
+}
+
+/* ================= DATA LOAD ================= */
+async function loadConfig(){
+  const raw = await safeGet('config', true);
+  if(raw){ try{ cache.config = JSON.parse(raw); }catch(e){} }
+  if(!cache.config.raceStart) cache.config.raceStart = {};
+}
+async function loadRoster(){
+  const raw = await safeGet('roster', true);
+  if(raw){ try{ cache.roster = JSON.parse(raw); }catch(e){ cache.roster = []; } }
+  else cache.roster = [];
+}
+async function loadAllTimes(){
+  const fetches = cache.roster.map(async p=>{
+    const raw = await safeGet('times:'+p.id, true);
+    cache.times[p.id] = raw ? JSON.parse(raw) : {};
+  });
+  await Promise.all(fetches);
+}
+async function loadAll(){
+  await loadConfig();
+  await loadRoster();
+  await loadAllTimes();
+  document.getElementById('sync-label').textContent = 'actualis\u00e9 \u00e0 ' + nowHMS();
+}
+async function saveRoster(){ await safeSet('roster', JSON.stringify(cache.roster), true); }
+async function saveConfig(){ await safeSet('config', JSON.stringify(cache.config), true); }
+async function saveTimesFor(id){ await safeSet('times:'+id, JSON.stringify(cache.times[id]||{}), true); }
+
+/* ================= TIME UTILS ================= */
+function nowHMS(){
+  const d = new Date();
+  return [d.getHours(),d.getMinutes(),d.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');
+}
+function hmsToSec(hms){
+  if(!hms) return null;
+  const parts = hms.split(':').map(Number);
+  if(parts.some(isNaN)) return null;
+  if(parts.length===3) return parts[0]*3600+parts[1]*60+parts[2];
+  if(parts.length===2) return parts[0]*60+parts[1];
+  return null;
+}
+function secToHMS(sec){
+  if(sec===null || sec===undefined || isNaN(sec)) return '—';
+  if(sec<0) sec += 24*3600;
+  const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = Math.floor(sec%60);
+  return (h>0? String(h).padStart(2,'0')+':':'') + String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function diffSec(aHMS,bHMS){
+  const a=hmsToSec(aHMS), b=hmsToSec(bHMS);
+  if(a===null||b===null) return null;
+  return b-a;
+}
+
+/* ================= COMPUTATION ================= */
+function computeSplits(p){
+  const t = cache.times[p.id] || {};
+  const start = cache.config.raceStart[p.race];
+  const swim = diffSec(start, t.swim_exit);
+  const t1   = diffSec(t.swim_exit, t.bike_start);
+  const bike = diffSec(t.bike_start, t.bike_end);
+  const t2   = diffSec(t.bike_end, t.run_start);
+  const run  = diffSec(t.run_start, t.finish);
+  const total = diffSec(start, t.finish);
+  return {swim,t1,bike,t2,run,total,raw:t,start};
+}
+function participantsForRace(list, race){
+  return list.filter(p=>p.race===race);
+}
+function rankParticipants(race, genderFilter){
+  let list = participantsForRace(cache.roster, race);
+  if(genderFilter && genderFilter!=='all') list = list.filter(p=>p.gender===genderFilter);
+  const withSplits = list.map(p=>({p, s:computeSplits(p)}));
+  const finished = withSplits.filter(x=>x.p.status!=='dnf' && x.s.total!==null);
+  const notFinished = withSplits.filter(x=>x.p.status!=='dnf' && x.s.total===null);
+  const dnf = withSplits.filter(x=>x.p.status==='dnf');
+  finished.sort((a,b)=>a.s.total-b.s.total);
+  return {finished, notFinished, dnf};
+}
+
+/* ================= CUSTOM DIALOGS (confirm()/prompt() natifs bloqués dans l'artefact) ================= */
+function customConfirm(message){
+  return new Promise(resolve=>{
+    document.getElementById('confirm-message').textContent = message;
+    const modal = document.getElementById('confirm-modal');
+    const okBtn = document.getElementById('confirm-ok');
+    const cancelBtn = document.getElementById('confirm-cancel');
+    modal.hidden = false;
+    function cleanup(result){
+      modal.hidden = true;
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      resolve(result);
+    }
+    function onOk(){ cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+  });
+}
+function customPrompt(message, defaultValue){
+  return new Promise(resolve=>{
+    document.getElementById('prompt-message').textContent = message;
+    const input = document.getElementById('prompt-input');
+    input.value = defaultValue || '';
+    const modal = document.getElementById('prompt-modal');
+    const okBtn = document.getElementById('prompt-ok');
+    const cancelBtn = document.getElementById('prompt-cancel');
+    modal.hidden = false;
+    setTimeout(()=>input.focus(), 30);
+    function cleanup(result){
+      modal.hidden = true;
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      input.removeEventListener('keydown', onKey);
+      resolve(result);
+    }
+    function onOk(){ cleanup(input.value); }
+    function onCancel(){ cleanup(null); }
+    function onKey(e){ if(e.key==='Enter'){ e.preventDefault(); onOk(); } if(e.key==='Escape') onCancel(); }
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    input.addEventListener('keydown', onKey);
+  });
+}
+
+/* ================= TOAST ================= */
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 1800);
+}
+
+/* ================= RENDER: RESULTS ================= */
+function renderRaceTabs(containerId, current, onPick){
+  const el = document.getElementById(containerId);
+  el.innerHTML = RACES.map(r=>`<button class="subtab-btn ${r===current?'active':''}" data-race="${r}">${r}</button>`).join('');
+  el.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{ onPick(b.dataset.race); });
+  });
+}
+
+function renderResults(){
+  renderRaceTabs('race-tabs', ui.race, (r)=>{ ui.race = r; renderResults(); });
+  const genderFilter = document.getElementById('filter-gender').value;
+  const search = document.getElementById('search-public').value.trim().toLowerCase();
+  const {finished, notFinished, dnf} = rankParticipants(ui.race, genderFilter);
+
+  // Podium
+  const podZone = document.getElementById('podium-zone');
+  if(finished.length>=1){
+    const top = finished.slice(0,3);
+    const order = [1,0,2].filter(i=>top[i]); // 2nd,1st,3rd visually
+    podZone.innerHTML = '<div class="podium">' + order.map(i=>{
+      const x = top[i]; const place = i+1;
+      const cls = place===1?'pod-1':place===2?'pod-2':'pod-3';
+      return `<div class="pod ${cls}"><div class="place">${place}</div><div class="name">${escapeHtml(fullName(x.p))}</div><div class="time">${secToHMS(x.s.total)}</div></div>`;
+    }).join('') + '</div>';
+  } else {
+    podZone.innerHTML = '';
+  }
+
+  // Table
+  const tbody = document.getElementById('results-tbody');
+  let rows = [];
+  let visFinished = finished.filter(x=> !search || fullName(x.p).toLowerCase().includes(search) || String(x.p.bib).includes(search));
+  const leaderTotal = finished[0] ? finished[0].s.total : null;
+  visFinished.forEach((x,idx)=>{
+    const rankCls = idx===0?'top1':idx===1?'top2':idx===2?'top3':'';
+    const gap = (leaderTotal!==null && x.s.total!==null && idx>0) ? '+'+secToHMS(x.s.total-leaderTotal) : (idx===0?'—':'—');
+    rows.push(`<tr class="clickable" data-id="${x.p.id}">
+      <td><span class="rank-num ${rankCls}">${idx+1}</span></td>
+      <td class="mono">#${escapeHtml(String(x.p.bib))}</td>
+      <td>${escapeHtml(fullName(x.p))}</td>
+      <td class="mono">${secToHMS(x.s.total)}</td>
+      <td class="mono" style="color:var(--muted);">${gap}</td>
+      <td><span class="badge badge-ok">Arriv\u00e9</span></td>
+    </tr>`);
+  });
+  let visRunning = notFinished.filter(x=> !search || fullName(x.p).toLowerCase().includes(search) || String(x.p.bib).includes(search));
+  visRunning.forEach(x=>{
+    const lastCp = lastReachedCheckpoint(x.p);
+    rows.push(`<tr class="clickable" data-id="${x.p.id}">
+      <td>—</td><td class="mono">#${escapeHtml(String(x.p.bib))}</td><td>${escapeHtml(fullName(x.p))}</td>
+      <td class="mono" style="color:var(--muted);">en course</td><td>—</td>
+      <td><span class="badge badge-wait">${lastCp}</span></td>
+    </tr>`);
+  });
+  let visDnf = dnf.filter(x=> !search || fullName(x.p).toLowerCase().includes(search) || String(x.p.bib).includes(search));
+  visDnf.forEach(x=>{
+    rows.push(`<tr class="clickable" data-id="${x.p.id}">
+      <td>—</td><td class="mono">#${escapeHtml(String(x.p.bib))}</td><td>${escapeHtml(fullName(x.p))}</td>
+      <td class="mono" style="color:var(--muted);">—</td><td>—</td>
+      <td><span class="badge badge-dnf">Abandon</span></td>
+    </tr>`);
+  });
+  tbody.innerHTML = rows.join('');
+  document.getElementById('results-empty').hidden = rows.length>0;
+  tbody.querySelectorAll('tr').forEach(tr=>{
+    tr.addEventListener('click', ()=> openSplitModal(tr.dataset.id));
+  });
+
+  renderBestSplits();
+}
+
+function lastReachedCheckpoint(p){
+  const t = cache.times[p.id] || {};
+  const labels = {swim_exit:'Sortie eau',bike_start:'Sur le v\u00e9lo',bike_end:'Fin v\u00e9lo',run_start:'Sur la course',finish:'Arriv\u00e9'};
+  let last = 'Pas encore parti';
+  for(const cp of CHECKPOINTS){ if(t[cp.key]) last = labels[cp.key]; }
+  return last;
+}
+
+function renderBestSplits(){
+  const list = participantsForRace(cache.roster, ui.race).filter(p=>p.status!=='dnf');
+  const withSplits = list.map(p=>({p, s:computeSplits(p)}));
+  function best(field, label, color){
+    const valid = withSplits.filter(x=>x.s[field]!==null && x.s[field]>0);
+    if(!valid.length) return `<div class="split-line"><div class="split-dot" style="background:${color}"></div><div class="split-label">${label}</div><div class="split-time" style="color:var(--muted)">—</div></div>`;
+    valid.sort((a,b)=>a.s[field]-b.s[field]);
+    const w = valid[0];
+    return `<div class="split-line"><div class="split-dot" style="background:${color}"></div><div class="split-label">${label} — ${escapeHtml(fullName(w.p))}</div><div class="split-time">${secToHMS(w.s[field])}</div></div>`;
+  }
+  document.getElementById('best-splits-body').innerHTML =
+    best('swim','Natation','var(--swim)') +
+    best('bike','V\u00e9lo','var(--bike)') +
+    best('run','Course \u00e0 pied','var(--run)');
+}
+
+function openSplitModal(id){
+  const p = cache.roster.find(x=>x.id===id);
+  if(!p) return;
+  const s = computeSplits(p);
+  document.getElementById('modal-name').textContent = fullName(p) + ' \u2014 #' + p.bib;
+  document.getElementById('modal-badges').innerHTML =
+    `<span class="badge badge-${p.race.toLowerCase()}">${p.race}</span> ` +
+    (p.status==='dnf' ? '<span class="badge badge-dnf">Abandon</span>' : '');
+  const lines = [
+    ['Natation', s.swim, 'var(--swim)'],
+    ['Transition 1 (T1)', s.t1, 'var(--muted)'],
+    ['V\u00e9lo', s.bike, 'var(--bike)'],
+    ['Transition 2 (T2)', s.t2, 'var(--muted)'],
+    ['Course \u00e0 pied', s.run, 'var(--run)'],
+  ];
+  let html = lines.map(([label,val,color])=>`
+    <div class="split-line">
+      <div class="split-dot" style="background:${color}"></div>
+      <div class="split-label">${label}</div>
+      <div class="split-time">${secToHMS(val)}</div>
+    </div>`).join('');
+  html += `<div class="split-line" style="border-bottom:none;padding-top:12px;">
+      <div class="split-label" style="font-family:var(--font-display);font-weight:800;font-size:15px;">TEMPS TOTAL</div>
+      <div class="split-time" style="font-size:16px;">${secToHMS(s.total)}</div>
+    </div>`;
+  document.getElementById('modal-splits').innerHTML = html;
+  document.getElementById('split-modal').hidden = false;
+}
+
+/* ================= RENDER: ADMIN — CHRONO ================= */
+function renderCpPicker(){
+  const el = document.getElementById('cp-picker');
+  el.innerHTML = CHECKPOINTS.map(cp=>`
+    <div class="cp-btn ${cp.key===ui.cp?'active':''}" data-cp="${cp.key}">
+      <span class="icon">${cp.icon}</span>${cp.label}
+    </div>`).join('');
+  el.querySelectorAll('.cp-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{ ui.cp = b.dataset.cp; renderCpPicker(); renderEntryList(); });
+  });
+}
+
+function renderEntryList(){
+  renderRaceTabs('race-tabs-admin', ui.raceAdmin, (r)=>{ ui.raceAdmin=r; renderEntryList(); });
+  const search = document.getElementById('search-admin').value.trim().toLowerCase();
+  let list = participantsForRace(cache.roster, ui.raceAdmin).filter(p=>p.status!=='dnf');
+  if(search) list = list.filter(p=>fullName(p).toLowerCase().includes(search) || String(p.bib).includes(search));
+  list.sort((a,b)=> String(a.bib).localeCompare(String(b.bib), undefined, {numeric:true}));
+  const cpLabel = CHECKPOINTS.find(c=>c.key===ui.cp).label;
+  const container = document.getElementById('entry-list');
+  if(!list.length){
+    container.innerHTML = `<div class="empty"><div class="big">👤</div>Aucun participant sur cette course.</div>`;
+    return;
+  }
+  container.innerHTML = list.map(p=>{
+    const t = (cache.times[p.id]||{})[ui.cp];
+    const done = !!t;
+    return `<div class="entry-row ${done?'done':''}" data-id="${p.id}">
+      <div class="entry-bib">${escapeHtml(String(p.bib))}</div>
+      <div class="entry-name">${escapeHtml(fullName(p))}</div>
+      ${done
+        ? `<div class="entry-time" data-edit="${p.id}">${t} ✎</div>`
+        : `<button class="btn-accent btn-sm" data-record="${p.id}">Pointer @ ${nowHMS()}</button>`
+      }
+    </div>`;
+  }).join('');
+  container.querySelectorAll('[data-record]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.record;
+      await recordTime(id, ui.cp, nowHMS());
+      renderEntryList();
+      toast(`${cpLabel} enregistr\u00e9`);
+    });
+  });
+  container.querySelectorAll('[data-edit]').forEach(span=>{
+    span.addEventListener('click', async ()=>{
+      const id = span.dataset.edit;
+      const current = (cache.times[id]||{})[ui.cp] || '';
+      const val = await customPrompt('Corriger l\u2019heure (HH:MM:SS) :', current);
+      if(val===null) return;
+      if(val.trim()===''){ delete cache.times[id][ui.cp]; await saveTimesFor(id); renderEntryList(); return; }
+      if(hmsToSec(val.trim())===null){ toast('Format invalide (HH:MM:SS)'); return; }
+      await recordTime(id, ui.cp, val.trim());
+      renderEntryList();
+    });
+  });
+}
+
+async function recordTime(id, cpKey, hms){
+  if(!cache.times[id]) cache.times[id] = {};
+  cache.times[id][cpKey] = hms;
+  await saveTimesFor(id);
+}
+
+/* ================= RENDER: ADMIN — PARTICIPANTS ================= */
+function renderParticipantsAdmin(){
+  document.getElementById('participant-count').textContent = cache.roster.length;
+  const tbody = document.getElementById('participants-tbody');
+  const sorted = [...cache.roster].sort((a,b)=> a.race.localeCompare(b.race) || String(a.bib).localeCompare(String(b.bib), undefined, {numeric:true}));
+  tbody.innerHTML = sorted.map(p=>`
+    <tr>
+      <td class="mono">#${escapeHtml(String(p.bib))}</td>
+      <td>${escapeHtml(p.lastName||'')}</td>
+      <td>${escapeHtml(p.firstName||'')}</td>
+      <td><span class="badge badge-${p.race.toLowerCase()}">${p.race}</span></td>
+      <td>${p.gender==='F'?'F':'H'}</td>
+      <td>${p.status==='dnf' ? '<span class="badge badge-dnf">Abandon</span>' : '<span class="badge badge-ok">Actif</span>'}</td>
+      <td>
+        <button class="btn-ghost btn-sm" data-toggle-dnf="${p.id}">${p.status==='dnf'?'Réactiver':'Abandon'}</button>
+        <button class="btn-ghost btn-sm" data-delete="${p.id}">🗑</button>
+      </td>
+    </tr>`).join('');
+  tbody.querySelectorAll('[data-toggle-dnf]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const p = cache.roster.find(x=>x.id===btn.dataset.toggleDnf);
+      p.status = p.status==='dnf' ? 'active' : 'dnf';
+      await saveRoster(); renderParticipantsAdmin();
+    });
+  });
+  tbody.querySelectorAll('[data-delete]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!(await customConfirm('Supprimer ce participant ?'))) return;
+      const id = btn.dataset.delete;
+      cache.roster = cache.roster.filter(x=>x.id!==id);
+      await saveRoster();
+      await safeDelete('times:'+id, true);
+      renderParticipantsAdmin(); renderEntryList();
+    });
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function fullName(p){
+  return [p.firstName||'', p.lastName||''].filter(Boolean).join(' ') || (p.name||'');
+}
+
+/* ================= ADMIN LOGIN ================= */
+function refreshLockScreen(){
+  const hasCode = !!cache.config.adminCode;
+  document.getElementById('lock-title').textContent = hasCode ? 'Acc\u00e8s admin' : 'Cr\u00e9er un code admin';
+  document.getElementById('lock-desc').textContent = hasCode ? 'Entrez le code pour g\u00e9rer le chronom\u00e9trage.' : 'Aucun code d\u00e9fini. Choisissez-en un \u2014 il sera demand\u00e9 \u00e0 tous les b\u00e9n\u00e9voles.';
+  document.getElementById('btn-unlock').textContent = hasCode ? 'Valider' : 'Cr\u00e9er';
+  document.getElementById('lock-hint').textContent = hasCode ? '' : 'Partagez ce code uniquement avec les b\u00e9n\u00e9voles au chrono.';
+}
+
+document.getElementById('btn-unlock').addEventListener('click', async ()=>{
+  const val = document.getElementById('admin-pin').value.trim();
+  if(!val) return;
+  if(!cache.config.adminCode){
+    cache.config.adminCode = val;
+    await saveConfig();
+    unlockAdmin();
+  } else if(val === cache.config.adminCode){
+    unlockAdmin();
+  } else {
+    toast('Code incorrect');
+  }
+});
+document.getElementById('admin-pin').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('btn-unlock').click(); });
+
+function unlockAdmin(){
+  ui.adminUnlocked = true;
+  document.getElementById('admin-lock').hidden = true;
+  document.getElementById('admin-panel').hidden = false;
+  document.getElementById('admin-pin').value='';
+  document.getElementById('start-sprint').value = cache.config.raceStart['Sprint'] || '';
+  document.getElementById('start-olympique').value = cache.config.raceStart['Olympique'] || '';
+  renderCpPicker(); renderEntryList(); renderParticipantsAdmin();
+}
+document.getElementById('btn-lock-again').addEventListener('click', ()=>{
+  ui.adminUnlocked = false;
+  document.getElementById('admin-lock').hidden = false;
+  document.getElementById('admin-panel').hidden = true;
+  refreshLockScreen();
+});
+
+/* ================= ADMIN ACTIONS ================= */
+document.getElementById('btn-add-participant').addEventListener('click', async ()=>{
+  const bib = document.getElementById('np-bib').value.trim();
+  const lastName = document.getElementById('np-lastname').value.trim();
+  const firstName = document.getElementById('np-firstname').value.trim();
+  const race = document.getElementById('np-race').value;
+  const gender = document.getElementById('np-gender').value;
+  if(!bib || !lastName){ toast('Dossard et nom requis'); return; }
+  const id = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  cache.roster.push({id, bib, firstName, lastName, race, gender, status:'active'});
+  await saveRoster();
+  cache.times[id] = {};
+  document.getElementById('np-bib').value=''; document.getElementById('np-lastname').value=''; document.getElementById('np-firstname').value='';
+  renderParticipantsAdmin(); renderEntryList();
+  toast('Participant ajout\u00e9');
+});
+
+document.getElementById('btn-save-starts').addEventListener('click', async ()=>{
+  const s = document.getElementById('start-sprint').value.trim();
+  const o = document.getElementById('start-olympique').value.trim();
+  if(s && hmsToSec(s)===null){ toast('Heure Sprint invalide'); return; }
+  if(o && hmsToSec(o)===null){ toast('Heure Olympique invalide'); return; }
+  cache.config.raceStart['Sprint'] = s;
+  cache.config.raceStart['Olympique'] = o;
+  await saveConfig();
+  toast('Heures de d\u00e9part enregistr\u00e9es');
+});
+
+document.getElementById('btn-change-pin').addEventListener('click', async ()=>{
+  const val = document.getElementById('new-pin').value.trim();
+  if(!val){ toast('Entrez un nouveau code'); return; }
+  cache.config.adminCode = val;
+  await saveConfig();
+  document.getElementById('new-pin').value='';
+  toast('Code admin mis \u00e0 jour');
+});
+
+document.getElementById('btn-reset-all').addEventListener('click', async ()=>{
+  if(!(await customConfirm('Supprimer TOUS les participants et TOUS les temps ? Cette action est irr\u00e9versible.'))) return;
+  const ids = cache.roster.map(p=>p.id);
+  await Promise.all(ids.map(id=>safeDelete('times:'+id, true)));
+  cache.roster = [];
+  cache.times = {};
+  await saveRoster();
+  renderParticipantsAdmin(); renderEntryList(); renderResults();
+  toast('Donn\u00e9es r\u00e9initialis\u00e9es');
+});
+
+document.getElementById('btn-template-csv').addEventListener('click', ()=>{
+  const csv = 'dossard;nom;prenom;course;genre\n101;Dupont;Marie;Sprint;F\n102;Martin;Lucas;Olympique;H';
+  downloadTextFile(csv, 'modele-participants.csv');
+});
+
+function normalizeHeader(s){
+  return String(s).trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // retire les accents
+}
+function parseCsvText(text){
+  const lines = text.split(/\r\n|\n|\r/).filter(l=>l.trim()!=='');
+  if(!lines.length) return {rows:[], error:'Fichier vide'};
+  const delim = (lines[0].match(/;/g)||[]).length >= (lines[0].match(/,/g)||[]).length ? ';' : ',';
+  const stripQuotes = v => v.trim().replace(/^"(.*)"$/,'$1').trim();
+  const header = lines[0].split(delim).map(h=>normalizeHeader(stripQuotes(h)));
+  const idx = {
+    bib: header.findIndex(h=>['dossard','bib','numero','no','n'].includes(h)),
+    lastName: header.findIndex(h=>['nom','lastname','nomdefamille'].includes(h)),
+    firstName: header.findIndex(h=>['prenom','firstname'].includes(h)),
+    race: header.findIndex(h=>['course','epreuve','race'].includes(h)),
+    gender: header.findIndex(h=>['genre','sexe','gender'].includes(h)),
+  };
+  if(idx.bib===-1 || idx.lastName===-1){
+    return {rows:[], error:'Colonnes "dossard" et "nom" introuvables dans l\u2019en-t\u00eate.'};
+  }
+  const rows = [];
+  for(let i=1;i<lines.length;i++){
+    const cols = lines[i].split(delim).map(stripQuotes);
+    const bib = cols[idx.bib] || '';
+    const lastName = cols[idx.lastName] || '';
+    if(!bib || !lastName) continue;
+    const firstName = idx.firstName>-1 ? (cols[idx.firstName]||'') : '';
+    let race = idx.race>-1 ? (cols[idx.race]||'') : '';
+    const raceMatch = RACES.find(r=>r.toLowerCase()===race.trim().toLowerCase());
+    race = raceMatch || 'Sprint';
+    let genderRaw = idx.gender>-1 ? normalizeHeader(cols[idx.gender]||'') : 'h';
+    const gender = ['f','femme','女','w'].includes(genderRaw) ? 'F' : 'H';
+    rows.push({bib, lastName, firstName, race, gender});
+  }
+  return {rows, error:null};
+}
+function downloadTextFile(text, filename){
+  const blob = new Blob([text], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('btn-import-csv').addEventListener('click', ()=>{
+  const fileInput = document.getElementById('csv-file');
+  const file = fileInput.files && fileInput.files[0];
+  const summary = document.getElementById('import-summary');
+  if(!file){ toast('Choisissez un fichier CSV d\u2019abord'); return; }
+  const reader = new FileReader();
+  reader.onload = async (e)=>{
+    const {rows, error} = parseCsvText(e.target.result);
+    if(error){ summary.textContent = '⚠️ ' + error; summary.style.color = 'var(--danger)'; return; }
+    if(!rows.length){ summary.textContent = 'Aucune ligne valide trouv\u00e9e (dossard et nom requis).'; summary.style.color='var(--danger)'; return; }
+    const existingKeys = new Set(cache.roster.map(p=>p.bib+'|'+p.race));
+    let added = 0, skipped = 0;
+    rows.forEach(r=>{
+      const key = r.bib+'|'+r.race;
+      if(existingKeys.has(key)){ skipped++; return; }
+      existingKeys.add(key);
+      const id = 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      cache.roster.push({id, bib:r.bib, lastName:r.lastName, firstName:r.firstName, race:r.race, gender:r.gender, status:'active'});
+      cache.times[id] = {};
+      added++;
+    });
+    await saveRoster();
+    summary.style.color = 'var(--ok)';
+    summary.textContent = `✓ ${added} participant(s) import\u00e9(s)` + (skipped ? `, ${skipped} ignor\u00e9(s) (dossard d\u00e9j\u00e0 existant sur cette course)` : '');
+    fileInput.value = '';
+    renderParticipantsAdmin(); renderEntryList();
+    toast(`${added} participant(s) import\u00e9(s)`);
+  };
+  reader.readAsText(file, 'UTF-8');
+});
+
+document.getElementById('btn-export-csv').addEventListener('click', ()=>{
+  const header = ['Dossard','Nom','Prenom','Course','Genre','Statut','Sortie eau','Depart velo','Fin velo','Debut course','Arrivee','Natation','T1','Velo','T2','Course a pied','Total'];
+  const lines = [header.join(';')];
+  cache.roster.forEach(p=>{
+    const s = computeSplits(p);
+    const t = cache.times[p.id]||{};
+    lines.push([p.bib,p.lastName||'',p.firstName||'',p.race,p.gender,p.status, t.swim_exit||'', t.bike_start||'', t.bike_end||'', t.run_start||'', t.finish||'',
+      secToHMS(s.swim), secToHMS(s.t1), secToHMS(s.bike), secToHMS(s.t2), secToHMS(s.run), secToHMS(s.total)].join(';'));
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'resultats-triathlon.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+/* ================= NAV ================= */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const view = btn.dataset.view;
+    document.getElementById('view-results').hidden = view!=='results';
+    document.getElementById('view-admin').hidden = view!=='admin';
+  });
+});
+document.querySelectorAll('.subtab-btn[data-admintab]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.subtab-btn[data-admintab]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.admintab;
+    document.getElementById('admintab-chrono').hidden = tab!=='chrono';
+    document.getElementById('admintab-participants').hidden = tab!=='participants';
+    document.getElementById('admintab-settings').hidden = tab!=='settings';
+  });
+});
+document.getElementById('modal-close').addEventListener('click', ()=> document.getElementById('split-modal').hidden = true);
+document.getElementById('split-modal').addEventListener('click', (e)=>{ if(e.target.id==='split-modal') e.target.hidden = true; });
+document.getElementById('search-public').addEventListener('input', renderResults);
+document.getElementById('filter-gender').addEventListener('change', renderResults);
+document.getElementById('search-admin').addEventListener('input', renderEntryList);
+document.getElementById('btn-refresh-public').addEventListener('click', async ()=>{ await loadAll(); renderResults(); if(ui.adminUnlocked){renderEntryList();renderParticipantsAdmin();} toast('Actualis\u00e9'); });
+
+/* ================= INIT + POLLING ================= */
+async function init(){
+  await loadAll();
+  refreshLockScreen();
+  renderResults();
+  ui.refreshTimer = setInterval(async ()=>{
+    await loadAll();
+    const resultsVisible = !document.getElementById('view-results').hidden;
+    const adminVisible = !document.getElementById('view-admin').hidden;
+    if(resultsVisible) renderResults();
+    if(adminVisible && ui.adminUnlocked){ renderEntryList(); renderParticipantsAdmin(); }
+  }, 9000);
+}
+init();
+</script>
+</body>
+</html>
